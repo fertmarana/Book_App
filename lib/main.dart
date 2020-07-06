@@ -26,6 +26,7 @@ class HomePage extends StatefulWidget{
 }
 
 class HomePageState extends State<HomePage>{
+  var _textController = new TextEditingController();
   final String url = 'https://desafio-mobile.nyc3.digitaloceanspaces.com/movies';
   List data;
 
@@ -61,15 +62,47 @@ class HomePageState extends State<HomePage>{
         itemCount: data == null ? 0 : data.length,
         itemBuilder: (BuildContext context, int index){
         return ListTile(
+
           leading: CircleAvatar(
-            backgroundImage: NetworkImage(
-              Text(data[index]["poster_url"]),
-            ),
+            backgroundImage: NetworkImage( data[index]['poster_url']),
+            //child: Image.asset( data[index]['poster_url'])  ,
           ),
-            title: data[index]["title"]
-        );
+          title: new Text( data[index]['title'] ),
+         trailing: Icon(Icons.keyboard_arrow_right),
+         onTap: (){
+            var route = new MaterialPageRoute(
+                builder: (BuildContext context) => new NextPage(value: _textController.text)
+            );
+          Navigator.of(context).push(route);
+            },
+
+         // subtitle: new Text( data[index]['vote_average']),
+          );
+
+        //);
         },
       ),
+    );
+  }
+}
+class NextPage extends StatefulWidget {
+  final String value;
+
+  NextPage({Key key, this.value}) : super (key:key);
+
+  @override
+  _NextPageState createState() => _NextPageState();
+}
+
+class _NextPageState extends State<NextPage> {
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text("Next Page"),
+      ),
+      body: new Text("${widget.value}"),
     );
   }
 }
