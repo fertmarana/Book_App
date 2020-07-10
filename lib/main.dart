@@ -203,48 +203,124 @@ class _NextPageState extends State<NextPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    var futurebody = new FutureBuilder(
+        future: _infos,
+        builder: (context,snapshot){
+          if(snapshot.hasData){
+            return createListView(context,snapshot);
+          }else if(snapshot.hasError){
+            return Text("${snapshot.error}");
+          }//else if(snapshot.hasData == false){
+          // return Text("No Data");
+          // }
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+    );
+
     return new Scaffold(
       appBar: new AppBar(
         title: new Text("Detalhes"),
 
       ),
-      body: FutureBuilder(
-        future: _infos,
-        builder: (context,snapshot){
-          if(snapshot.hasData){
-            return Center(
-              child: Card(
-                margin: EdgeInsets.all(8.0),
-                child: Column(
-                  children: [
-                    Container(
-                      child: Text(snapshot.data.title,
-                      style: TextStyle(fontFamily: 'RobotMono', fontSize: 42),
-                      ),
-                    ),
-                    Container(
-                      child: Image.network(snapshot.data.poster_url),
-                    ),
-                    Container(
-                      child: Text("Overview: " + snapshot.data.overview),
-                    ),
-                  ],
-                ),
-              ),
-
-
-            );
-              //Text(snapshot.data.title);
-          }else if(snapshot.hasError){
-            return Text("${snapshot.error}");
-          }else if(snapshot.hasData == false){
-            return Text("No Data");
-          }
-          return CircularProgressIndicator();
-        }
-      )
+      body: futurebody,
 
 
     );
+  }
+
+  Widget createListView(BuildContext context, AsyncSnapshot snapshot) {
+    List _genres = new List.from(snapshot.data.genres);
+    return Center(
+        child: ListView(
+            padding: EdgeInsets.all(8.0),
+            children: [
+              Container(
+                child: Center(child: Text(snapshot.data.title,
+                  style: TextStyle(fontFamily: 'RobotMono', fontSize: 42),
+                ),
+                ),
+               // padding: EdgeInsets.fromLTRB(60, 0,60,0),
+
+              ),
+              //SizedBox(height: 10),
+              Container(
+                child: FadeInImage.assetNetwork(
+                  placeholder: 'images/notfound2.png',
+                  image: snapshot.data.poster_url,
+                  height: 300.0,
+                  //  width: 50.0 ,
+                ),
+
+                //child: Image.network(snapshot.data.poster_url),
+              ),
+              SizedBox(height: 10),
+              Container(
+                padding: EdgeInsets.fromLTRB(60, 0,60,0),
+                child: Center(
+                  child: RichText(
+                    text: new TextSpan(
+                      children:
+                      <TextSpan>[
+                        new TextSpan(text: snapshot.data.tagline, style: new TextStyle(fontSize: 21, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
+
+                      ],
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: RichText(
+                  text: new TextSpan(
+                    children:
+                    <TextSpan>[
+                      new TextSpan(text: 'Overview: ', style: new TextStyle(fontWeight: FontWeight.bold)),
+                      new TextSpan(text: snapshot.data.overview),
+                    ],
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: Expanded(
+                  child: SizedBox(
+                    height: 200.0,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _genres == null? 0: _genres.length,
+                    itemBuilder: (BuildContext content, int index ){
+                      if(index == 0){
+                        return RichText(
+                          text: new TextSpan(
+                          children:
+                          <TextSpan>[
+                            new TextSpan(text: 'Genres: ', style: new TextStyle(fontWeight: FontWeight.bold)),
+                            new TextSpan(text: _genres[index] + ", "),
+                          ],
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        );
+                      }else{
+                        return Text(_genres[index] + ", ");
+                      }
+
+                    },
+                  ),
+                ),
+                ),
+
+              ),
+            ],
+
+        ),
+    );
+
   }
 }
