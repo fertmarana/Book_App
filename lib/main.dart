@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+
 //import 'package:gti_sesa_saude/models/unidade.model.dar';
 
 
@@ -30,7 +32,7 @@ class Infos{
   final String poster_url;
   final List production_companies;
   final List production_countries;
-  final String release_date;
+  final DateTime release_date;
   final int revenue;
   final int runtime;
   final List spoken_languages;
@@ -64,7 +66,7 @@ class Infos{
       poster_url : json['poster_url'],
       production_companies : json['production_companies'],
       production_countries : json['production_countries'],
-      release_date : json['release_date'],
+      release_date : DateTime.parse(json['release_date']),
       revenue : json['revenue'],
       runtime : json['runtime'],
       spoken_languages : json['spoken_languages '],
@@ -121,7 +123,8 @@ class HomePageState extends State<HomePage>{
   Widget build(BuildContext context){
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Lista de Livros'),
+        centerTitle: true,
+        title: new Text('Filmes'),
         //backgroundColor: Colors.blueGrey[900],
       ),
       body: new ListView.builder(
@@ -185,12 +188,7 @@ class _NextPageState extends State<NextPage> {
     }else{
       throw Exception('Failed');
     }
-   // print(response);
-  //  setState(() {
-  //    data = json.decode(response.body);
-  //    print(data.length.toString() );
-  //  });
- //   return "Sucess";
+
   }
 
   @override
@@ -222,6 +220,7 @@ class _NextPageState extends State<NextPage> {
 
     return new Scaffold(
       appBar: new AppBar(
+        centerTitle: true,
         title: new Text("Detalhes"),
 
       ),
@@ -233,6 +232,10 @@ class _NextPageState extends State<NextPage> {
 
   Widget createListView(BuildContext context, AsyncSnapshot snapshot) {
     List _genres = new List.from(snapshot.data.genres);
+    List _production_companies = new List.from(snapshot.data.production_companies);
+    List _production_countries = new List.from(snapshot.data.production_countries);
+    DateFormat formatter = DateFormat('dd/MM/yyyy');
+    String release_day = formatter.format(snapshot.data.release_date);
     return Center(
         child: ListView(
             padding: EdgeInsets.all(8.0),
@@ -279,6 +282,32 @@ class _NextPageState extends State<NextPage> {
                   text: new TextSpan(
                     children:
                     <TextSpan>[
+                      new TextSpan(text: 'Release Date: ', style: new TextStyle(fontWeight: FontWeight.bold)),
+                      new TextSpan(text: release_day),
+                    ],
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: RichText(
+                  text: new TextSpan(
+                    children:
+                    <TextSpan>[
+                      new TextSpan(text: 'Average Vote: ', style: new TextStyle(fontWeight: FontWeight.bold)),
+                      new TextSpan(text: snapshot.data.vote_average.toString()),
+                    ],
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: RichText(
+                  text: new TextSpan(
+                    children:
+                    <TextSpan>[
                       new TextSpan(text: 'Overview: ', style: new TextStyle(fontWeight: FontWeight.bold)),
                       new TextSpan(text: snapshot.data.overview),
                     ],
@@ -291,29 +320,120 @@ class _NextPageState extends State<NextPage> {
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                 child: Expanded(
                   child: SizedBox(
-                    height: 200.0,
+                    height: 20.0,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: _genres == null? 0: _genres.length,
                     itemBuilder: (BuildContext content, int index ){
-                      if(index == 0){
+                      if(index == 0 && index+1 != _genres.length){
                         return RichText(
                           text: new TextSpan(
                           children:
                           <TextSpan>[
                             new TextSpan(text: 'Genres: ', style: new TextStyle(fontWeight: FontWeight.bold)),
-                            new TextSpan(text: _genres[index] + ", "),
+                            new TextSpan(text: _genres[index]),
+                            new TextSpan(text: ", "),
                           ],
                           style: TextStyle(color: Colors.black),
                         ),
                         );
-                      }else{
+                      } if(index == 0 && index+1 == _genres.length){
+                        return RichText(
+                            text: new TextSpan(
+                            children:
+                            <TextSpan>[
+                            new TextSpan(text: 'Genres: ', style: new TextStyle(fontWeight: FontWeight.bold)),
+                            new TextSpan(text: _genres[index]),
+                            ],
+                             style: TextStyle(color: Colors.black),
+                            ),
+                          );
+                      }
+                      else if(index != 0 && index+1 != _genres.length){
                         return Text(_genres[index] + ", ");
+                      }else{
+                        return Text(_genres[index]);
                       }
 
                     },
                   ),
                 ),
+                ),
+
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: Expanded(
+                  child: SizedBox(
+                    height: 20.0,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _production_countries== null? 0: _production_countries.length,
+                      itemBuilder: (BuildContext content, int index ){
+                        if(index == 0){
+                          return RichText(
+                            text: new TextSpan(
+                              children:
+                              <TextSpan>[
+                                new TextSpan(text: 'Production Countries: ', style: new TextStyle(fontWeight: FontWeight.bold)),
+                                new TextSpan(text: _production_countries[index]['name']),
+                                new TextSpan(text: ", "),
+                              ],
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          );
+                        }else{
+                          return Text(_production_countries[index]['name'] + ", ");
+                        }
+
+                      },
+                    ),
+                  ),
+                ),
+
+              ),
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: Expanded(
+                  child: SizedBox(
+                    height: 20.0,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _production_companies == null? 0: _production_companies.length,
+                      itemBuilder: (BuildContext content, int index ){
+                        if(index == 0 && index+1 != _production_companies.length){
+                          return RichText(
+                            text: new TextSpan(
+                              children:
+                              <TextSpan>[
+                                new TextSpan(text: 'Production Companies: ', style: new TextStyle(fontWeight: FontWeight.bold)),
+                                new TextSpan(text: _production_companies[index]['name']),
+                                new TextSpan(text: ", "),
+                              ],
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          );
+                        } if(index == 0 && index+1 == _production_companies.length){
+                          return RichText(
+                            text: new TextSpan(
+                              children:
+                              <TextSpan>[
+                                new TextSpan(text: 'Production Companies: ', style: new TextStyle(fontWeight: FontWeight.bold)),
+                                new TextSpan(text: _production_companies[index]['name']),
+                              ],
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          );
+                        }
+                        else if(index != 0 && index+1 != _production_companies.length){
+                          return Text(_production_companies[index]['name'] + ", ");
+                        }else{
+                          return Text(_production_companies[index]['name']);
+                        }
+
+                      },
+                    ),
+                  ),
                 ),
 
               ),
